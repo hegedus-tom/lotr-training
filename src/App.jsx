@@ -52,7 +52,7 @@ function StartScreen({ onStart, selected, onToggle }) {
       <div className="ring-icon">💍</div>
       <h1>Pán prstenů</h1>
       <h2>Trivia Kvíz</h2>
-      <p>Ověř si znalosti z filmů, knih a karetních her světa Středozemě! Moč jde zbořit kvíz!</p>
+      <p>Drilovací kvíz těžkých otázek z LotR universa. Pojďme se nabušit! Moč jde zbořit kvíz!</p>
       <div className="quiz-info">
         <span>23 otázek</span>
         <span>·</span>
