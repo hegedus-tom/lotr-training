@@ -58,7 +58,7 @@ function StartScreen({ onStart, selected, onToggle }) {
         <span>·</span>
         <span>Střední & těžká</span>
       </div>
-      <div className="cat-label">Kategorie</div>
+      <div className="cat-label">Vyber si kategorie otázek</div>
       <div className="cat-toggles">
         {CATEGORIES.map(cat => (
           <button
@@ -288,7 +288,7 @@ export default function App() {
   const [idx, setIdx] = useState(0)
   const [score, setScore] = useState(0)
   const [wrongQuestions, setWrongQuestions] = useState([])
-  const [selected, setSelected] = useState(CATEGORIES.map(c => c.id))
+  const [selected, setSelected] = useState(['movie', 'book'])
 
   const toggleCategory = useCallback((id) => {
     setSelected(prev =>
