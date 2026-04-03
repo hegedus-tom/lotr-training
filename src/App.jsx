@@ -79,17 +79,30 @@ function StartScreen({ onStart, selected, onToggle }) {
 
 // ── QuizScreen ───────────────────────────────────────────────────────────────
 
+function shuffleArray(arr) {
+  const copy = [...arr]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
 function QuizScreen({ question, questionNumber, total, onAnswer }) {
   const [openAnswer, setOpenAnswer] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null)
+  const [shuffledOptions, setShuffledOptions] = useState([])
 
   useEffect(() => {
     setOpenAnswer('')
     setSubmitted(false)
     setIsCorrect(false)
     setSelectedOption(null)
+    if (question.type === 'ABCD') {
+      setShuffledOptions(shuffleArray(question.options))
+    }
   }, [question])
 
   const commit = (correct) => {
@@ -136,7 +149,7 @@ function QuizScreen({ question, questionNumber, total, onAnswer }) {
 
       {question.type === 'ABCD' ? (
         <div className="options">
-          {question.options.map((opt, i) => (
+          {shuffledOptions.map((opt, i) => (
             <button
               key={i}
               className={optionClass(opt)}
