@@ -120,6 +120,41 @@ html, body {
   margin: 8px 0 24px !important;
 }
 
+/* ── Category toggles ── */
+.cat-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 8px;
+}
+
+.cat-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.cat-btn {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(201,168,76,0.25);
+  background: var(--bg3);
+  color: var(--text-dim);
+  font-family: 'Lato', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.cat-btn.active {
+  background: rgba(201,168,76,0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 /* ── Buttons ── */
 .btn-primary {
   width: 100%;

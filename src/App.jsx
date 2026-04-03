@@ -3,6 +3,13 @@ import allQuestions from './data/questions.json'
 
 const QUIZ_LENGTH = 23
 
+const CATEGORIES = [
+  { id: 'movie',     label: '🎬 Film' },
+  { id: 'book',      label: '📚 Knihy' },
+  { id: 'biography', label: '✍️ Tolkien' },
+  { id: 'tcg',       label: '🃏 Karetní hra' },
+]
+
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 function normalize(str) {
@@ -38,7 +45,8 @@ function getCategoryLabel(cat) {
 
 // ── StartScreen ──────────────────────────────────────────────────────────────
 
-function StartScreen({ onStart }) {
+function StartScreen({ onStart, selected, onToggle }) {
+  const noneSelected = selected.length === 0
   return (
     <div className="screen start-screen">
       <div className="ring-icon">💍</div>
@@ -50,7 +58,19 @@ function StartScreen({ onStart }) {
         <span>·</span>
         <span>Střední & těžká</span>
       </div>
-      <button className="btn-primary" onClick={onStart}>
+      <div className="cat-label">Kategorie</div>
+      <div className="cat-toggles">
+        {CATEGORIES.map(cat => (
+          <button
+            key={cat.id}
+            className={`cat-btn${selected.includes(cat.id) ? ' active' : ''}`}
+            onClick={() => onToggle(cat.id)}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+      <button className="btn-primary" onClick={onStart} disabled={noneSelected}>
         Spustit kvíz
       </button>
     </div>
@@ -212,29 +232,37 @@ export default function App() {
   const [questions, setQuestions] = useState([])
   const [idx, setIdx] = useState(0)
   const [score, setScore] = useState(0)
+  const [selected, setSelected] = useState(CATEGORIES.map(c => c.id))
+
+  const toggleCategory = useCallback((id) => {
+    setSelected(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    )
+  }, [])
 
   const startQuiz = useCallback(() => {
-    setQuestions(pickRandom(allQuestions, QUIZ_LENGTH))
+    const pool = allQuestions.filter(q => selected.includes(q.category))
+    setQuestions(pickRandom(pool, Math.min(QUIZ_LENGTH, pool.length)))
     setIdx(0)
     setScore(0)
     setPhase('quiz')
-  }, [])
+  }, [selected])
 
   const handleAnswer = useCallback((correct) => {
     const next = idx + 1
     const newScore = score + (correct ? 1 : 0)
-    if (next >= QUIZ_LENGTH) {
+    if (next >= questions.length) {
       setScore(newScore)
       setPhase('result')
     } else {
       setScore(newScore)
       setIdx(next)
     }
-  }, [idx, score])
+  }, [idx, score, questions])
 
   return (
     <div className="app">
-      {phase === 'start'  && <StartScreen onStart={startQuiz} />}
+      {phase === 'start'  && <StartScreen onStart={startQuiz} selected={selected} onToggle={toggleCategory} />}
       {phase === 'quiz'   && questions[idx] && (
         <QuizScreen
           question={questions[idx]}
@@ -244,7 +272,7 @@ export default function App() {
         />
       )}
       {phase === 'result' && (
-        <ResultScreen score={score} total={QUIZ_LENGTH} onRestart={startQuiz} />
+        <ResultScreen score={score} total={questions.length} onRestart={() => setPhase('start')} />
       )}
     </div>
   )
