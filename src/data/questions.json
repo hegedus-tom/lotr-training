@@ -4947,20 +4947,6 @@
     "answer": "Tactics"
   },
   {
-    "id": 384,
-    "category": "book",
-    "difficulty": "hard",
-    "type": "ABCD",
-    "question": "Jak se jmenoval první Temný pán?",
-    "options": [
-      "Melkor",
-      "Sauron",
-      "Morgoth",
-      "Všechny odpovědi jsou správné"
-    ],
-    "answer": "Všechny odpovědi jsou správné"
-  },
-  {
     "id": 385,
     "category": "movie",
     "difficulty": "hard",
@@ -6285,20 +6271,6 @@
       "Duch"
     ],
     "answer": "Spirit"
-  },
-  {
-    "id": 484,
-    "category": "book",
-    "difficulty": "hard",
-    "type": "ABCD",
-    "question": "Jak se jmenoval první Temný pán?",
-    "options": [
-      "Melkor",
-      "Sauron",
-      "Morgoth",
-      "Všechny odpovědi jsou správné"
-    ],
-    "answer": "Všechny odpovědi jsou správné"
   },
   {
     "id": 485,
