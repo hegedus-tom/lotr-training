@@ -85,7 +85,6 @@ function QuizScreen({ question, questionNumber, total, onAnswer }) {
   const [isCorrect, setIsCorrect] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null)
 
-  // reset state when question changes
   useEffect(() => {
     setOpenAnswer('')
     setSubmitted(false)
@@ -122,7 +121,6 @@ function QuizScreen({ question, questionNumber, total, onAnswer }) {
 
   return (
     <div className="screen quiz-screen">
-      {/* Progress */}
       <div className="progress-wrap">
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${progress * 100}%` }} />
@@ -188,7 +186,7 @@ function QuizScreen({ question, questionNumber, total, onAnswer }) {
 
 // ── ResultScreen ─────────────────────────────────────────────────────────────
 
-function ResultScreen({ score, total, onRestart }) {
+function ResultScreen({ score, total, wrongQuestions, onReviewQuiz, onReviewList, onRestart }) {
   const pct = Math.round((score / total) * 100)
   const [barWidth, setBarWidth] = useState(0)
 
@@ -205,6 +203,8 @@ function ResultScreen({ score, total, onRestart }) {
     return { msg: 'Ani Glum by to lépe nedal!', emoji: '🐟' }
   })()
 
+  const hasWrong = wrongQuestions.length > 0
+
   return (
     <div className="screen result-screen">
       <div className="result-emoji">{emoji}</div>
@@ -218,7 +218,49 @@ function ResultScreen({ score, total, onRestart }) {
         <div className="score-bar-fill" style={{ width: `${barWidth}%` }} />
       </div>
       <p className="result-message">{msg}</p>
-      <button className="btn-primary" onClick={onRestart}>
+
+      {hasWrong && (
+        <div className="review-prompt">
+          <p className="review-prompt-text">
+            Chceš procvičit {wrongQuestions.length} {wrongQuestions.length === 1 ? 'špatnou otázku' : wrongQuestions.length < 5 ? 'špatné otázky' : 'špatných otázek'}?
+          </p>
+          <div className="review-btns">
+            <button className="btn-primary" onClick={onReviewQuiz}>
+              Ano, procvičit
+            </button>
+            <button className="btn-secondary" onClick={onReviewList}>
+              Ne, zobrazit odpovědi
+            </button>
+          </div>
+        </div>
+      )}
+
+      <button className="btn-ghost" onClick={onRestart}>
+        Hrát znovu
+      </button>
+    </div>
+  )
+}
+
+// ── ReviewListScreen ──────────────────────────────────────────────────────────
+
+function ReviewListScreen({ wrongQuestions, onRestart }) {
+  return (
+    <div className="screen review-screen">
+      <h2 className="review-title">Správné odpovědi</h2>
+      <p className="review-subtitle">{wrongQuestions.length} {wrongQuestions.length === 1 ? 'otázka' : wrongQuestions.length < 5 ? 'otázky' : 'otázek'}</p>
+      <div className="review-list">
+        {wrongQuestions.map((q, i) => (
+          <div key={q.id} className="review-item">
+            <div className="review-item-num">{i + 1}</div>
+            <div className="review-item-body">
+              <p className="review-item-q">{q.question}</p>
+              <p className="review-item-a">✓ {q.answer}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <button className="btn-primary" onClick={onRestart} style={{ marginTop: '8px' }}>
         Hrát znovu
       </button>
     </div>
@@ -232,6 +274,7 @@ export default function App() {
   const [questions, setQuestions] = useState([])
   const [idx, setIdx] = useState(0)
   const [score, setScore] = useState(0)
+  const [wrongQuestions, setWrongQuestions] = useState([])
   const [selected, setSelected] = useState(CATEGORIES.map(c => c.id))
 
   const toggleCategory = useCallback((id) => {
@@ -240,17 +283,21 @@ export default function App() {
     )
   }, [])
 
-  const startQuiz = useCallback(() => {
-    const pool = allQuestions.filter(q => selected.includes(q.category))
-    setQuestions(pickRandom(pool, Math.min(QUIZ_LENGTH, pool.length)))
+  const startQuiz = useCallback((pool) => {
+    const source = pool ?? allQuestions.filter(q => selected.includes(q.category))
+    setQuestions(pickRandom(source, Math.min(QUIZ_LENGTH, source.length)))
     setIdx(0)
     setScore(0)
+    setWrongQuestions([])
     setPhase('quiz')
   }, [selected])
 
   const handleAnswer = useCallback((correct) => {
     const next = idx + 1
     const newScore = score + (correct ? 1 : 0)
+    if (!correct) {
+      setWrongQuestions(prev => [...prev, questions[idx]])
+    }
     if (next >= questions.length) {
       setScore(newScore)
       setPhase('result')
@@ -262,17 +309,32 @@ export default function App() {
 
   return (
     <div className="app">
-      {phase === 'start'  && <StartScreen onStart={startQuiz} selected={selected} onToggle={toggleCategory} />}
-      {phase === 'quiz'   && questions[idx] && (
+      {phase === 'start' && (
+        <StartScreen onStart={() => startQuiz()} selected={selected} onToggle={toggleCategory} />
+      )}
+      {phase === 'quiz' && questions[idx] && (
         <QuizScreen
           question={questions[idx]}
           questionNumber={idx + 1}
-          total={QUIZ_LENGTH}
+          total={questions.length}
           onAnswer={handleAnswer}
         />
       )}
       {phase === 'result' && (
-        <ResultScreen score={score} total={questions.length} onRestart={() => setPhase('start')} />
+        <ResultScreen
+          score={score}
+          total={questions.length}
+          wrongQuestions={wrongQuestions}
+          onReviewQuiz={() => startQuiz(wrongQuestions)}
+          onReviewList={() => setPhase('review-list')}
+          onRestart={() => setPhase('start')}
+        />
+      )}
+      {phase === 'review-list' && (
+        <ReviewListScreen
+          wrongQuestions={wrongQuestions}
+          onRestart={() => setPhase('start')}
+        />
       )}
     </div>
   )
